@@ -90,7 +90,7 @@ const adminPass =
   process.env.ADMIN_PASS || "change-this-password";
 
 /* Railway / Proxy */
-app.set("trust proxy", 1);
+app.set("trust proxy", true);
 
 /* =========================
    MIDDLEWARE
@@ -305,8 +305,6 @@ function approved(id) {
    PUBLIC
 ========================= */
 
-/* جميع التذكارات المنشورة */
-
 app.get(
   "/api/memorials",
   (req, res) => {
@@ -400,8 +398,6 @@ app.get(
   }
 );
 
-/* تذكار واحد */
-
 app.get(
   "/api/memorials/:id",
   (req, res) => {
@@ -440,8 +436,6 @@ app.get(
 
   }
 );
-
-/* الصفحة الرئيسية */
 
 app.get(
   "/api/home",
@@ -497,8 +491,6 @@ app.get(
 
   }
 );
-
-/* تذكار عشوائي */
 
 app.get(
   "/api/random",
