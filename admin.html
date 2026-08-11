@@ -1,9 +1,243 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>إدارة — أثر</title><link rel="stylesheet" href="/style.css"><style>body{padding:30px}.admin{max-width:1100px;margin:auto}.row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff12;padding:15px 0;flex-wrap:wrap}.danger{background:#43201c}.mini{padding:7px 11px;border-radius:10px;border:1px solid #ffffff16;background:#15271f;color:#eee}</style></head><body><div class="admin"><h1 style="font-family:Amiri">لوحة إدارة أثر</h1><p class="muted">أدخل بيانات الدخول عند طلب المتصفح.</p><section class="box"><h2>رفع مقطع MP3</h2><form id="audioForm" class="form"><input name="title" placeholder="اسم المقطع"><input name="audio" type="file" accept="audio/mpeg" required><button class="btn primary">رفع</button></form><div id="audios"></div></section><section class="box"><h2>التذكارات</h2><div id="mems">جارٍ التحميل...</div></section><section class="box"><h2>البلاغات</h2><div id="reports">جارٍ التحميل...</div></section></div><script>
-async function api(u,o){let r=await fetch(u,o);if(!r.ok)throw new Error("تعذر تنفيذ العملية");return r.json()}
-async function load(){let m=await api("/api/admin/memorials");document.getElementById("mems").innerHTML=m.map(x=>`<div class="row"><div><b>${x.display_name}</b><br><small>${x.status} · ${x.prayer_count} دعوة</small></div><div>${x.status!=="Approved"?`<button class="mini" onclick="status('${x.id}','Approved')">موافقة</button>`:""} ${x.status!=="Rejected"?`<button class="mini" onclick="status('${x.id}','Rejected')">رفض</button>`:""} <button class="mini danger" onclick="del('${x.id}')">حذف</button></div></div>`).join("")||"<div class='empty'>لا توجد طلبات.</div>";let a=await api("/api/admin/audio");document.getElementById("audios").innerHTML=a.map(x=>`<div class="row">${x.title}<button class="mini danger" onclick="delAudio(${x.id})">حذف</button></div>`).join("")}
-async function status(id,s){await api("/api/admin/memorials/"+id+"/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:s})});load()}
-async function del(id){if(confirm("حذف؟")){await api("/api/admin/memorials/"+id,{method:"DELETE"});load()}}
-async function delAudio(id){if(confirm("حذف المقطع؟")){await api("/api/admin/audio/"+id,{method:"DELETE"});load()}}
-document.getElementById("audioForm").onsubmit=async e=>{e.preventDefault();await api("/api/admin/audio",{method:"POST",body:new FormData(e.target)});e.target.reset();load()}
-load()
-</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة — أثر</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+body{padding:30px}
+.admin{max-width:1100px;margin:auto}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff12;padding:15px 0;flex-wrap:wrap}
+.danger{background:#43201c}
+.mini{padding:7px 11px;border-radius:10px;border:1px solid #ffffff16;background:#15271f;color:#eee}
+</style>
+</head>
+
+<body>
+<div class="admin">
+
+<h1 style="font-family:Amiri">لوحة إدارة أثر</h1>
+<p class="muted">أدخل بيانات الدخول عند طلب المتصفح.</p>
+
+<section class="box">
+<h2>رفع مقطع MP3</h2>
+
+<form id="audioForm" class="form">
+<input name="title" placeholder="اسم المقطع">
+<input name="audio" type="file" accept="audio/mpeg" required>
+<button class="btn primary">رفع</button>
+</form>
+
+<div id="audios">جارٍ التحميل...</div>
+</section>
+
+<section class="box">
+<h2>التذكارات</h2>
+<div id="mems">جارٍ التحميل...</div>
+</section>
+
+<section class="box">
+<h2>البلاغات</h2>
+<div id="reports">جارٍ التحميل...</div>
+</section>
+
+</div>
+
+<script>
+
+async function api(u,o){
+  let r=await fetch(u,o);
+  if(!r.ok) throw new Error("تعذر تنفيذ العملية");
+  return r.json();
+}
+
+async function load(){
+
+  try{
+
+    let m=await api("/api/admin/memorials");
+
+    document.getElementById("mems").innerHTML=
+      m.map(x=>`
+        <div class="row">
+          <div>
+            <b>${x.display_name}</b><br>
+            <small>${x.status} · ${x.prayer_count} دعوة</small>
+          </div>
+
+          <div>
+            ${x.status!=="Approved"
+              ? `<button class="mini" onclick="statusChange('${x.id}','Approved')">موافقة</button>`
+              : ""}
+
+            ${x.status!=="Rejected"
+              ? `<button class="mini" onclick="statusChange('${x.id}','Rejected')">رفض</button>`
+              : ""}
+
+            <button class="mini danger" onclick="delMemorial('${x.id}')">
+              حذف
+            </button>
+          </div>
+        </div>
+      `).join("") || "<div class='empty'>لا توجد طلبات.</div>";
+
+  }catch(e){
+
+    document.getElementById("mems").innerHTML=
+      "<div class='empty'>تعذر تحميل التذكارات.</div>";
+
+  }
+
+
+  try{
+
+    let a=await api("/api/admin/audio");
+
+    document.getElementById("audios").innerHTML=
+      a.map(x=>`
+        <div class="row">
+          <span>${x.title}</span>
+
+          <button class="mini danger" onclick="delAudio(${x.id})">
+            حذف
+          </button>
+        </div>
+      `).join("") || "<div class='empty'>لا توجد مقاطع.</div>";
+
+  }catch(e){
+
+    document.getElementById("audios").innerHTML=
+      "<div class='empty'>تعذر تحميل المقاطع.</div>";
+
+  }
+
+
+  try{
+
+    let r=await api("/api/admin/reports");
+
+    document.getElementById("reports").innerHTML=
+      r.map(x=>`
+        <div class="row">
+
+          <div>
+            <b>بلاغ على: ${x.memorial_id}</b><br>
+            <small>${x.reason} · ${x.status}</small>
+
+            ${x.message
+              ? `<br>${x.message}`
+              : ""}
+          </div>
+
+          <button class="mini" onclick="reviewReport(${x.id})">
+            تمت المراجعة
+          </button>
+
+        </div>
+      `).join("") || "<div class='empty'>لا توجد بلاغات.</div>";
+
+  }catch(e){
+
+    document.getElementById("reports").innerHTML=
+      "<div class='empty'>تعذر تحميل البلاغات.</div>";
+
+  }
+
+}
+
+
+async function statusChange(id,s){
+
+  await api("/api/admin/memorials/"+id+"/status",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      status:s
+    })
+  });
+
+  load();
+
+}
+
+
+async function delMemorial(id){
+
+  if(confirm("حذف؟")){
+
+    await api("/api/admin/memorials/"+id,{
+      method:"DELETE"
+    });
+
+    load();
+
+  }
+
+}
+
+
+async function delAudio(id){
+
+  if(confirm("حذف المقطع؟")){
+
+    await api("/api/admin/audio/"+id,{
+      method:"DELETE"
+    });
+
+    load();
+
+  }
+
+}
+
+
+async function reviewReport(id){
+
+  await api("/api/admin/reports/"+id+"/status",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      status:"Reviewed"
+    })
+  });
+
+  load();
+
+}
+
+
+document.getElementById("audioForm").onsubmit=async e=>{
+
+  e.preventDefault();
+
+  try{
+
+    await api("/api/admin/audio",{
+      method:"POST",
+      body:new FormData(e.target)
+    });
+
+    e.target.reset();
+
+    load();
+
+  }catch(error){
+
+    alert("تعذر رفع المقطع");
+
+  }
+
+};
+
+
+load();
+
+</script>
+
+</body>
+</html>
