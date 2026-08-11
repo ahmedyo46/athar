@@ -1,242 +1,799 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>إدارة — أثر</title>
-<link rel="stylesheet" href="/style.css">
-<style>
-body{padding:30px}
-.admin{max-width:1100px;margin:auto}
-.row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff12;padding:15px 0;flex-wrap:wrap}
-.danger{background:#43201c}
-.mini{padding:7px 11px;border-radius:10px;border:1px solid #ffffff16;background:#15271f;color:#eee}
-</style>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#071611"
+  >
+
+  <title>
+    إدارة — أثر
+  </title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="/style.css"
+  >
+
+  <style>
+    body {
+      padding: 100px 20px 40px;
+    }
+
+    .admin {
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .adminHeader {
+      margin-bottom: 30px;
+    }
+
+    .adminHeader h1 {
+      margin: 0;
+      font-family: Amiri, serif;
+      font-size: 42px;
+    }
+
+    .adminSection {
+      margin-bottom: 24px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .rowInfo {
+      min-width: 220px;
+      flex: 1;
+    }
+
+    .rowActions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini {
+      padding: 8px 12px;
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #15271f;
+      color: #eee;
+      cursor: pointer;
+    }
+
+    .mini:hover {
+      border-color: #aa995f;
+    }
+
+    .danger {
+      background: #43201c;
+    }
+
+    .approve {
+      background: #203a2a;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+    }
+
+    .adminForm {
+      max-width: 650px;
+    }
+
+    .audioPreview {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 90px 14px 30px;
+      }
+
+      .adminHeader h1 {
+        font-size: 34px;
+      }
+
+      .row {
+        align-items: flex-start;
+      }
+
+      .rowActions {
+        width: 100%;
+      }
+
+      .mini {
+        flex: 1;
+      }
+    }
+  </style>
+
 </head>
 
 <body>
+
 <div class="admin">
 
-<h1 style="font-family:Amiri">لوحة إدارة أثر</h1>
-<p class="muted">أدخل بيانات الدخول عند طلب المتصفح.</p>
+  <div class="adminHeader">
 
-<section class="box">
-<h2>رفع مقطع MP3</h2>
+    <h1>
+      لوحة إدارة أثر
+    </h1>
 
-<form id="audioForm" class="form">
-<input name="title" placeholder="اسم المقطع">
-<input name="audio" type="file" accept="audio/mpeg" required>
-<button class="btn primary">رفع</button>
-</form>
+    <p class="muted">
+      من هنا يمكنك مراجعة التذكارات
+      وإدارة المقاطع والبلاغات.
+    </p>
 
-<div id="audios">جارٍ التحميل...</div>
-</section>
+    <a
+      class="btn back"
+      href="/"
+    >
+      ← العودة للموقع
+    </a>
 
-<section class="box">
-<h2>التذكارات</h2>
-<div id="mems">جارٍ التحميل...</div>
-</section>
+  </div>
 
-<section class="box">
-<h2>البلاغات</h2>
-<div id="reports">جارٍ التحميل...</div>
-</section>
+  <!-- AUDIO -->
+
+  <section
+    class="box adminSection"
+  >
+
+    <h2>
+      رفع مقطع MP3
+    </h2>
+
+    <form
+      id="audioForm"
+      class="form adminForm"
+      enctype="multipart/form-data"
+    >
+
+      <label>
+        اسم المقطع — اختياري
+
+        <input
+          name="title"
+          maxlength="200"
+          placeholder="مثال: ذكر هادئ"
+        >
+      </label>
+
+      <label>
+        ملف MP3
+
+        <input
+          name="audio"
+          type="file"
+          accept="audio/mpeg,.mp3"
+          required
+        >
+      </label>
+
+      <button
+        class="btn primary"
+        type="submit"
+      >
+        رفع المقطع
+      </button>
+
+    </form>
+
+    <div
+      id="audios"
+      class="adminList"
+    >
+      جارٍ التحميل...
+    </div>
+
+  </section>
+
+  <!-- MEMORIALS -->
+
+  <section
+    class="box adminSection"
+  >
+
+    <h2>
+      التذكارات
+    </h2>
+
+    <div id="mems">
+      جارٍ التحميل...
+    </div>
+
+  </section>
+
+  <!-- REPORTS -->
+
+  <section
+    class="box adminSection"
+  >
+
+    <h2>
+      البلاغات
+    </h2>
+
+    <div id="reports">
+      جارٍ التحميل...
+    </div>
+
+  </section>
 
 </div>
 
 <script>
+async function api(url, options = {}) {
+  const response =
+    await fetch(url, options);
 
-async function api(u,o){
-  let r=await fetch(u,o);
-  if(!r.ok) throw new Error("تعذر تنفيذ العملية");
-  return r.json();
+  let data = {};
+
+  try {
+    data =
+      await response.json();
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.error ||
+      "تعذر تنفيذ العملية"
+    );
+  }
+
+  return data;
 }
 
-async function load(){
+function esc(value) {
+  return String(value ?? "")
+    .replace(
+      /[&<>"']/g,
+      (char) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        })[char]
+    );
+}
 
-  try{
+function showError(
+  element,
+  message
+) {
+  element.innerHTML = `
+    <div class="empty">
+      ${esc(message)}
+    </div>
+  `;
+}
 
-    let m=await api("/api/admin/memorials");
+async function loadMemorials() {
+  const element =
+    document.getElementById(
+      "mems"
+    );
 
-    document.getElementById("mems").innerHTML=
-      m.map(x=>`
-        <div class="row">
-          <div>
-            <b>${x.display_name}</b><br>
-            <small>${x.status} · ${x.prayer_count} دعوة</small>
-          </div>
+  try {
+    const memorials =
+      await api(
+        "/api/admin/memorials"
+      );
 
-          <div>
-            ${x.status!=="Approved"
-              ? `<button class="mini" onclick="statusChange('${x.id}','Approved')">موافقة</button>`
-              : ""}
-
-            ${x.status!=="Rejected"
-              ? `<button class="mini" onclick="statusChange('${x.id}','Rejected')">رفض</button>`
-              : ""}
-
-            <button class="mini danger" onclick="delMemorial('${x.id}')">
-              حذف
-            </button>
-          </div>
+    if (!memorials.length) {
+      element.innerHTML = `
+        <div class="empty">
+          لا توجد تذكارات.
         </div>
-      `).join("") || "<div class='empty'>لا توجد طلبات.</div>";
+      `;
 
-  }catch(e){
+      return;
+    }
 
-    document.getElementById("mems").innerHTML=
-      "<div class='empty'>تعذر تحميل التذكارات.</div>";
+    element.innerHTML =
+      memorials
+        .map(
+          (item) => `
+            <div class="row">
 
+              <div class="rowInfo">
+
+                <b>
+                  ${esc(
+                    item.display_name
+                  )}
+                </b>
+
+                <br>
+
+                <span class="status">
+                  ${esc(
+                    item.status
+                  )}
+                </span>
+
+                <br>
+
+                <small class="muted">
+                  ${Number(
+                    item.prayer_count || 0
+                  )}
+                  دعوة
+                </small>
+
+              </div>
+
+              <div class="rowActions">
+
+                ${
+                  item.status !==
+                  "Approved"
+                    ? `
+                      <button
+                        class="mini approve"
+                        onclick="changeStatus(
+                          '${esc(item.id)}',
+                          'Approved'
+                        )"
+                      >
+                        موافقة
+                      </button>
+                    `
+                    : ""
+                }
+
+                ${
+                  item.status !==
+                  "Rejected"
+                    ? `
+                      <button
+                        class="mini"
+                        onclick="changeStatus(
+                          '${esc(item.id)}',
+                          'Rejected'
+                        )"
+                      >
+                        رفض
+                      </button>
+                    `
+                    : ""
+                }
+
+                ${
+                  item.status !==
+                  "Hidden"
+                    ? `
+                      <button
+                        class="mini"
+                        onclick="changeStatus(
+                          '${esc(item.id)}',
+                          'Hidden'
+                        )"
+                      >
+                        إخفاء
+                      </button>
+                    `
+                    : ""
+                }
+
+                <button
+                  class="mini danger"
+                  onclick="deleteMemorial(
+                    '${esc(item.id)}'
+                  )"
+                >
+                  حذف
+                </button>
+
+              </div>
+
+            </div>
+          `
+        )
+        .join("");
+  } catch (error) {
+    showError(
+      element,
+      error.message
+    );
   }
+}
 
+async function loadAudio() {
+  const element =
+    document.getElementById(
+      "audios"
+    );
 
-  try{
+  try {
+    const audio =
+      await api(
+        "/api/admin/audio"
+      );
 
-    let a=await api("/api/admin/audio");
-
-    document.getElementById("audios").innerHTML=
-      a.map(x=>`
-        <div class="row">
-          <span>${x.title}</span>
-
-          <button class="mini danger" onclick="delAudio(${x.id})">
-            حذف
-          </button>
+    if (!audio.length) {
+      element.innerHTML = `
+        <div class="empty">
+          لا توجد مقاطع مرفوعة.
         </div>
-      `).join("") || "<div class='empty'>لا توجد مقاطع.</div>";
+      `;
 
-  }catch(e){
+      return;
+    }
 
-    document.getElementById("audios").innerHTML=
-      "<div class='empty'>تعذر تحميل المقاطع.</div>";
+    element.innerHTML =
+      audio
+        .map(
+          (item) => `
+            <div class="row">
 
+              <div class="rowInfo">
+
+                <b>
+                  ${esc(
+                    item.title
+                  )}
+                </b>
+
+                <audio
+                  class="audioPreview"
+                  controls
+                  preload="none"
+                  src="${esc(
+                    item.audio_url
+                  )}"
+                ></audio>
+
+              </div>
+
+              <div class="rowActions">
+
+                <button
+                  class="mini danger"
+                  onclick="deleteAudio(
+                    ${Number(item.id)}
+                  )"
+                >
+                  حذف
+                </button>
+
+              </div>
+
+            </div>
+          `
+        )
+        .join("");
+  } catch (error) {
+    showError(
+      element,
+      error.message
+    );
   }
+}
 
+async function loadReports() {
+  const element =
+    document.getElementById(
+      "reports"
+    );
 
-  try{
+  try {
+    const reports =
+      await api(
+        "/api/admin/reports"
+      );
 
-    let r=await api("/api/admin/reports");
-
-    document.getElementById("reports").innerHTML=
-      r.map(x=>`
-        <div class="row">
-
-          <div>
-            <b>بلاغ على: ${x.memorial_id}</b><br>
-            <small>${x.reason} · ${x.status}</small>
-
-            ${x.message
-              ? `<br>${x.message}`
-              : ""}
-          </div>
-
-          <button class="mini" onclick="reviewReport(${x.id})">
-            تمت المراجعة
-          </button>
-
+    if (!reports.length) {
+      element.innerHTML = `
+        <div class="empty">
+          لا توجد بلاغات.
         </div>
-      `).join("") || "<div class='empty'>لا توجد بلاغات.</div>";
+      `;
 
-  }catch(e){
+      return;
+    }
 
-    document.getElementById("reports").innerHTML=
-      "<div class='empty'>تعذر تحميل البلاغات.</div>";
+    element.innerHTML =
+      reports
+        .map(
+          (item) => `
+            <div class="row">
 
+              <div class="rowInfo">
+
+                <b>
+                  بلاغ على:
+                  ${
+                    esc(
+                      item.memorial_name ||
+                      item.memorial_id
+                    )
+                  }
+                </b>
+
+                <br>
+
+                <span class="status">
+                  ${esc(
+                    item.status
+                  )}
+                </span>
+
+                <br>
+
+                <small>
+                  ${esc(
+                    item.reason
+                  )}
+                </small>
+
+                ${
+                  item.message
+                    ? `
+                      <p class="muted">
+                        ${esc(
+                          item.message
+                        )}
+                      </p>
+                    `
+                    : ""
+                }
+
+              </div>
+
+              <div class="rowActions">
+
+                ${
+                  item.status !==
+                  "Reviewed"
+                    ? `
+                      <button
+                        class="mini"
+                        onclick="reviewReport(
+                          ${Number(
+                            item.id
+                          )}
+                        )"
+                      >
+                        تمت المراجعة
+                      </button>
+                    `
+                    : ""
+                }
+
+              </div>
+
+            </div>
+          `
+        )
+        .join("");
+  } catch (error) {
+    showError(
+      element,
+      error.message
+    );
+  }
+}
+
+async function changeStatus(
+  id,
+  status
+) {
+  try {
+    await api(
+      "/api/admin/memorials/" +
+      encodeURIComponent(id) +
+      "/status",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+          status
+        })
+      }
+    );
+
+    await loadAll();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function deleteMemorial(
+  id
+) {
+  if (
+    !confirm(
+      "هل أنت متأكد من حذف التذكار؟"
+    )
+  ) {
+    return;
   }
 
+  try {
+    await api(
+      "/api/admin/memorials/" +
+      encodeURIComponent(id),
+      {
+        method: "DELETE"
+      }
+    );
+
+    await loadAll();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-
-async function statusChange(id,s){
-
-  await api("/api/admin/memorials/"+id+"/status",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      status:s
-    })
-  });
-
-  load();
-
-}
-
-
-async function delMemorial(id){
-
-  if(confirm("حذف؟")){
-
-    await api("/api/admin/memorials/"+id,{
-      method:"DELETE"
-    });
-
-    load();
-
+async function deleteAudio(
+  id
+) {
+  if (
+    !confirm(
+      "هل أنت متأكد من حذف المقطع؟"
+    )
+  ) {
+    return;
   }
 
-}
+  try {
+    await api(
+      "/api/admin/audio/" +
+      encodeURIComponent(id),
+      {
+        method: "DELETE"
+      }
+    );
 
-
-async function delAudio(id){
-
-  if(confirm("حذف المقطع؟")){
-
-    await api("/api/admin/audio/"+id,{
-      method:"DELETE"
-    });
-
-    load();
-
+    await loadAll();
+  } catch (error) {
+    alert(error.message);
   }
-
 }
 
+async function reviewReport(
+  id
+) {
+  try {
+    await api(
+      "/api/admin/reports/" +
+      encodeURIComponent(id) +
+      "/status",
+      {
+        method: "POST",
 
-async function reviewReport(id){
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
 
-  await api("/api/admin/reports/"+id+"/status",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      status:"Reviewed"
-    })
-  });
+        body: JSON.stringify({
+          status: "Reviewed"
+        })
+      }
+    );
 
-  load();
-
-}
-
-
-document.getElementById("audioForm").onsubmit=async e=>{
-
-  e.preventDefault();
-
-  try{
-
-    await api("/api/admin/audio",{
-      method:"POST",
-      body:new FormData(e.target)
-    });
-
-    e.target.reset();
-
-    load();
-
-  }catch(error){
-
-    alert("تعذر رفع المقطع");
-
+    await loadAll();
+  } catch (error) {
+    alert(error.message);
   }
+}
 
-};
+document
+  .getElementById(
+    "audioForm"
+  )
+  .addEventListener(
+    "submit",
+    async (event) => {
+      event.preventDefault();
 
+      const form =
+        event.currentTarget;
 
-load();
+      const button =
+        form.querySelector(
+          "button[type='submit']"
+        );
 
+      button.disabled = true;
+      button.textContent =
+        "جارٍ الرفع...";
+
+      try {
+        await api(
+          "/api/admin/audio",
+          {
+            method: "POST",
+            body:
+              new FormData(form)
+          }
+        );
+
+        form.reset();
+
+        await loadAudio();
+
+        alert(
+          "تم رفع المقطع بنجاح"
+        );
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        button.disabled = false;
+        button.textContent =
+          "رفع المقطع";
+      }
+    }
+  );
+
+async function loadAll() {
+  await Promise.all([
+    loadMemorials(),
+    loadAudio(),
+    loadReports()
+  ]);
+}
+
+loadAll();
 </script>
 
 </body>
