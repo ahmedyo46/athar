@@ -8,8 +8,13 @@ const multer = require("multer");
 
 const app = express();
 
-const PORT = process.env.PORT || 8080;
+/* =========================
+   BASIC CONFIG
+========================= */
+
+const PORT = Number(process.env.PORT) || 8080;
 const ROOT = __dirname;
+
 const DATA = path.join(ROOT, "data");
 const UPLOADS = path.join(ROOT, "uploads");
 
@@ -80,7 +85,7 @@ ON reports(status);
 `);
 
 /* =========================
-   ADMIN
+   ADMIN SETTINGS
 ========================= */
 
 const adminUser =
@@ -89,8 +94,13 @@ const adminUser =
 const adminPass =
   process.env.ADMIN_PASS || "change-this-password";
 
-/* Railway / Proxy */
-app.set("trust proxy", true);
+/*
+  Railway puts the app behind a proxy.
+  Trust only the first proxy.
+  This fixes the X-Forwarded-For /
+  express-rate-limit problem.
+*/
+app.set("trust proxy", 1);
 
 /* =========================
    MIDDLEWARE
@@ -108,17 +118,6 @@ app.use(
   })
 );
 
-app.use(
-  express.static(ROOT, {
-    maxAge: "1h"
-  })
-);
-
-app.use(
-  "/uploads",
-  express.static(UPLOADS)
-);
-
 /* =========================
    RATE LIMIT
 ========================= */
@@ -127,13 +126,21 @@ const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 90,
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+
+  /*
+    Use the IP supplied by Express after
+    trust proxy has been configured.
+  */
+  keyGenerator: (req) => {
+    return req.ip || "unknown";
+  }
 });
 
 app.use("/api", apiLimiter);
 
 /* =========================
-   UPLOADS
+   UPLOAD STORAGE
 ========================= */
 
 const storage = multer.diskStorage({
@@ -143,6 +150,7 @@ const storage = multer.diskStorage({
   },
 
   filename: (_req, file, cb) => {
+
     cb(
       null,
       crypto.randomUUID() +
@@ -150,81 +158,230 @@ const storage = multer.diskStorage({
         file.originalname
       ).toLowerCase()
     );
+
   }
 
 });
+
+/* =========================
+   IMAGE UPLOAD
+========================= */
 
 const upload = multer({
 
   storage,
 
   limits: {
-    fileSize:
-      8 * 1024 * 1024
+    fileSize: 8 * 1024 * 1024
   },
 
-  fileFilter:
-    (_req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
 
-      const allowed = [
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "image/avif"
-      ];
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/avif"
+    ];
 
-      const ok =
-        allowed.includes(
-          file.mimetype
-        );
+    const ok =
+      allowed.includes(
+        file.mimetype
+      );
 
-      cb(
-        ok
-          ? null
-          : new Error(
-              "نوع الصورة غير مدعوم"
-            ),
-        ok
+    if (!ok) {
+      return cb(
+        new Error(
+          "نوع الصورة غير مدعوم"
+        )
       );
     }
 
+    cb(null, true);
+  }
+
 });
+
+/* =========================
+   AUDIO UPLOAD
+========================= */
 
 const audioUpload = multer({
 
   storage,
 
   limits: {
-    fileSize:
-      25 * 1024 * 1024
+    fileSize: 25 * 1024 * 1024
   },
 
-  fileFilter:
-    (_req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
 
-      const ok =
-        file.mimetype ===
-        "audio/mpeg";
+    const ok =
+      file.mimetype === "audio/mpeg";
 
-      cb(
-        ok
-          ? null
-          : new Error(
-              "يجب رفع ملف MP3"
-            ),
-        ok
+    if (!ok) {
+      return cb(
+        new Error(
+          "يجب رفع ملف MP3"
+        )
       );
     }
 
+    cb(null, true);
+  }
+
 });
+
+/* =========================
+   STATIC FILES
+========================= */
+
+/*
+  Keep your existing project structure:
+  index.html
+  admin.html
+  app.js
+  style.css
+*/
+
+app.get("/", (_req, res) => {
+
+  const file =
+    path.join(
+      ROOT,
+      "index.html"
+    );
+
+  if (!fs.existsSync(file)) {
+    return res
+      .status(404)
+      .send("الصفحة الرئيسية غير موجودة");
+  }
+
+  res.sendFile(file);
+
+});
+
+app.get("/index.html", (_req, res) => {
+
+  res.sendFile(
+    path.join(
+      ROOT,
+      "index.html"
+    )
+  );
+
+});
+
+/* =========================
+   ADMIN PAGE
+========================= */
+
+app.get("/admin", (_req, res) => {
+
+  const publicAdmin =
+    path.join(
+      ROOT,
+      "public",
+      "admin.html"
+    );
+
+  const rootAdmin =
+    path.join(
+      ROOT,
+      "admin.html"
+    );
+
+  if (fs.existsSync(publicAdmin)) {
+    return res.sendFile(publicAdmin);
+  }
+
+  if (fs.existsSync(rootAdmin)) {
+    return res.sendFile(rootAdmin);
+  }
+
+  return res
+    .status(404)
+    .send("لوحة الإدارة غير موجودة");
+
+});
+
+app.get("/admin/", (_req, res) => {
+
+  const publicAdmin =
+    path.join(
+      ROOT,
+      "public",
+      "admin.html"
+    );
+
+  const rootAdmin =
+    path.join(
+      ROOT,
+      "admin.html"
+    );
+
+  if (fs.existsSync(publicAdmin)) {
+    return res.sendFile(publicAdmin);
+  }
+
+  if (fs.existsSync(rootAdmin)) {
+    return res.sendFile(rootAdmin);
+  }
+
+  return res
+    .status(404)
+    .send("لوحة الإدارة غير موجودة");
+
+});
+
+app.get("/admin.html", (_req, res) => {
+
+  const file =
+    path.join(
+      ROOT,
+      "admin.html"
+    );
+
+  if (!fs.existsSync(file)) {
+    return res
+      .status(404)
+      .send("لوحة الإدارة غير موجودة");
+  }
+
+  res.sendFile(file);
+
+});
+
+/* =========================
+   CSS / JS / OTHER FRONTEND
+========================= */
+
+app.use(
+  express.static(ROOT, {
+    maxAge: "1h",
+    index: false
+  })
+);
+
+/* =========================
+   UPLOADS
+========================= */
+
+app.use(
+  "/uploads",
+  express.static(UPLOADS)
+);
 
 /* =========================
    HELPERS
 ========================= */
 
 function now() {
+
   return new Date()
     .toISOString();
+
 }
 
 function getAudio(audioId) {
@@ -247,6 +404,7 @@ function getAudio(audioId) {
       .get(audioId)
     || null
   );
+
 }
 
 function safeMemorial(row) {
@@ -286,6 +444,7 @@ function safeMemorial(row) {
       )
 
   };
+
 }
 
 function approved(id) {
@@ -302,7 +461,7 @@ function approved(id) {
 }
 
 /* =========================
-   PUBLIC
+   PUBLIC MEMORIALS
 ========================= */
 
 app.get(
@@ -336,8 +495,7 @@ app.get(
         );
 
       const offset =
-        (page - 1) *
-        limit;
+        (page - 1) * limit;
 
       let rows;
 
@@ -374,15 +532,20 @@ app.get(
               limit,
               offset
             );
+
       }
 
       res.json({
+
         items:
           rows.map(
             safeMemorial
           ),
+
         page,
+
         limit
+
       });
 
     } catch (err) {
@@ -393,10 +556,15 @@ app.get(
         error:
           "تعذر تحميل التذكارات"
       });
+
     }
 
   }
 );
+
+/* =========================
+   SINGLE MEMORIAL
+========================= */
 
 app.get(
   "/api/memorials/:id",
@@ -432,10 +600,15 @@ app.get(
         error:
           "تعذر تحميل التذكار"
       });
+
     }
 
   }
 );
+
+/* =========================
+   HOME
+========================= */
 
 app.get(
   "/api/home",
@@ -468,9 +641,7 @@ app.get(
       res.json({
 
         daily:
-          safeMemorial(
-            daily
-          ),
+          safeMemorial(daily),
 
         latest:
           latest.map(
@@ -487,10 +658,15 @@ app.get(
         error:
           "تعذر تحميل الصفحة الرئيسية"
       });
+
     }
 
   }
 );
+
+/* =========================
+   RANDOM MEMORIAL
+========================= */
 
 app.get(
   "/api/random",
@@ -532,6 +708,7 @@ app.get(
         error:
           "تعذر تحميل التذكار"
       });
+
     }
 
   }
@@ -581,7 +758,7 @@ app.post(
 
       }
 
-      const tx =
+      const transaction =
         db.transaction(() => {
 
           const result =
@@ -601,9 +778,7 @@ app.post(
                 now()
               );
 
-          if (
-            result.changes
-          ) {
+          if (result.changes) {
 
             db
               .prepare(`
@@ -616,12 +791,12 @@ app.post(
 
           }
 
-          return (
-            result.changes === 1
-          );
+          return result.changes === 1;
+
         });
 
-      const added = tx();
+      const added =
+        transaction();
 
       const count =
         db
@@ -630,14 +805,16 @@ app.post(
             FROM memorials
             WHERE id=?
           `)
-          .get(
-            row.id
-          ).prayer_count;
+          .get(row.id)
+          .prayer_count;
 
       res.json({
+
         added,
+
         prayer_count:
           count
+
       });
 
     } catch (err) {
@@ -648,6 +825,7 @@ app.post(
         error:
           "تعذر تسجيل الدعاء"
       });
+
     }
 
   }
@@ -673,9 +851,7 @@ app.post(
 
       if (
         !display_name ||
-        display_name
-          .trim()
-          .length < 2
+        display_name.trim().length < 2
       ) {
 
         return res
@@ -741,6 +917,7 @@ app.post(
         error:
           "تعذر إرسال التذكار"
       });
+
     }
 
   }
@@ -762,11 +939,7 @@ app.post(
         message
       } = req.body;
 
-      if (
-        !approved(
-          memorial_id
-        )
-      ) {
+      if (!approved(memorial_id)) {
 
         return res
           .status(404)
@@ -807,6 +980,7 @@ app.post(
         error:
           "تعذر إرسال البلاغ"
       });
+
     }
 
   }
@@ -816,23 +990,14 @@ app.post(
    ADMIN AUTH
 ========================= */
 
-function admin(
-  req,
-  res,
-  next
-) {
+function admin(req, res, next) {
 
   const auth =
     String(
-      req.headers.authorization ||
-      ""
+      req.headers.authorization || ""
     );
 
-  if (
-    !auth.startsWith(
-      "Basic "
-    )
-  ) {
+  if (!auth.startsWith("Basic ")) {
 
     res.set(
       "WWW-Authenticate",
@@ -842,6 +1007,7 @@ function admin(
     return res
       .status(401)
       .end();
+
   }
 
   try {
@@ -854,14 +1020,30 @@ function admin(
         )
         .toString();
 
-    const i =
+    const separator =
       decoded.indexOf(":");
 
+    if (separator === -1) {
+
+      return res
+        .status(403)
+        .json({
+          error:
+            "بيانات الدخول غير صحيحة"
+        });
+
+    }
+
     const username =
-      decoded.slice(0, i);
+      decoded.slice(
+        0,
+        separator
+      );
 
     const password =
-      decoded.slice(i + 1);
+      decoded.slice(
+        separator + 1
+      );
 
     if (
       username !== adminUser ||
@@ -881,12 +1063,15 @@ function admin(
 
   } catch (err) {
 
+    console.error(err);
+
     return res
       .status(403)
       .json({
         error:
           "بيانات الدخول غير صحيحة"
       });
+
   }
 
 }
@@ -921,10 +1106,15 @@ app.get(
         error:
           "تعذر تحميل التذكارات"
       });
+
     }
 
   }
 );
+
+/* =========================
+   CHANGE MEMORIAL STATUS
+========================= */
 
 app.post(
   "/api/admin/memorials/:id/status",
@@ -947,10 +1137,7 @@ app.post(
           ? req.body.status
           : "Pending";
 
-      if (
-        status ===
-        "Approved"
-      ) {
+      if (status === "Approved") {
 
         const audio =
           db
@@ -1010,10 +1197,15 @@ app.post(
         error:
           "تعذر تغيير حالة التذكار"
       });
+
     }
 
   }
 );
+
+/* =========================
+   DELETE MEMORIAL
+========================= */
 
 app.delete(
   "/api/admin/memorials/:id",
@@ -1042,6 +1234,7 @@ app.delete(
         error:
           "تعذر حذف التذكار"
       });
+
     }
 
   }
@@ -1077,10 +1270,15 @@ app.get(
         error:
           "تعذر تحميل البلاغات"
       });
+
     }
 
   }
 );
+
+/* =========================
+   REVIEW REPORT
+========================= */
 
 app.post(
   "/api/admin/reports/:id/status",
@@ -1113,6 +1311,7 @@ app.post(
         error:
           "تعذر تحديث البلاغ"
       });
+
     }
 
   }
@@ -1173,10 +1372,15 @@ app.post(
         error:
           "تعذر رفع المقطع"
       });
+
     }
 
   }
 );
+
+/* =========================
+   GET AUDIO
+========================= */
 
 app.get(
   "/api/admin/audio",
@@ -1204,10 +1408,15 @@ app.get(
         error:
           "تعذر تحميل المقاطع"
       });
+
     }
 
   }
 );
+
+/* =========================
+   DELETE AUDIO
+========================= */
 
 app.delete(
   "/api/admin/audio/:id",
@@ -1236,18 +1445,19 @@ app.delete(
         error:
           "تعذر حذف المقطع"
       });
+
     }
 
   }
 );
 
 /* =========================
-   PAGES
+   MEMORIAL PAGE
 ========================= */
 
 app.get(
   "/memorial/:id",
-  (req, res) => {
+  (_req, res) => {
 
     const publicIndex =
       path.join(
@@ -1262,11 +1472,7 @@ app.get(
         "index.html"
       );
 
-    if (
-      fs.existsSync(
-        publicIndex
-      )
-    ) {
+    if (fs.existsSync(publicIndex)) {
 
       return res.sendFile(
         publicIndex
@@ -1274,11 +1480,7 @@ app.get(
 
     }
 
-    if (
-      fs.existsSync(
-        rootIndex
-      )
-    ) {
+    if (fs.existsSync(rootIndex)) {
 
       return res.sendFile(
         rootIndex
@@ -1291,55 +1493,7 @@ app.get(
       .send(
         "الصفحة غير موجودة"
       );
-  }
-);
 
-app.get(
-  "/admin",
-  (req, res) => {
-
-    const publicAdmin =
-      path.join(
-        ROOT,
-        "public",
-        "admin.html"
-      );
-
-    const rootAdmin =
-      path.join(
-        ROOT,
-        "admin.html"
-      );
-
-    if (
-      fs.existsSync(
-        publicAdmin
-      )
-    ) {
-
-      return res.sendFile(
-        publicAdmin
-      );
-
-    }
-
-    if (
-      fs.existsSync(
-        rootAdmin
-      )
-    ) {
-
-      return res.sendFile(
-        rootAdmin
-      );
-
-    }
-
-    res
-      .status(404)
-      .send(
-        "لوحة الإدارة غير موجودة"
-      );
   }
 );
 
@@ -1364,11 +1518,12 @@ app.use(
           err.message ||
           "حدث خطأ"
       });
+
   }
 );
 
 /* =========================
-   START
+   START SERVER
 ========================= */
 
 app.listen(
