@@ -1,141 +1,88 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+Keep the existing index.html exactly as it is and keep all current features and design.
 
-<head>
-  <meta charset="utf-8">
+Add two new main sections to the homepage.
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
+First section:
 
-  <meta
-    name="theme-color"
-    content="#071611"
-  >
+Title:
+"🤍 المتوفون"
 
-  <meta
-    name="description"
-    content="أثر — رحمهم الله. بعض الأسماء لا ينبغي أن تُنسى."
-  >
+Description:
+"هنا تقدر تلاقي تذكارات الأشخاص اللي رحلوا، وتدخل تدعي لهم وتفتكرهم."
 
-  <meta
-    property="og:title"
-    content="أثر — رحمهم الله"
-  >
+Button:
+"عرض المتوفين"
 
-  <meta
-    property="og:description"
-    content="بعض الأسماء لا ينبغي أن تُنسى."
-  >
+When the visitor clicks it, open a dedicated page or section that displays ONLY approved deceased memorials.
 
-  <title>
-    أثر — رحمهم الله
-  </title>
+Display deceased memorials vertically from newest to oldest.
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  >
+Each memorial card should show:
+- deceased person's photo if available
+- name
+- "رحمه الله"
+- death date if available
+- button "زيارة الذكرى"
 
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
+Second section:
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  >
+Title:
+"🌿 اترك أثرًا"
 
-  <link
-    rel="stylesheet"
-    href="/style.css"
-  >
-</head>
+Description:
+"لو حابب تترك كلمة طيبة أو ذكرًا أو دعاءً يبقى لك، تقدر تنشئ أثرك هنا."
 
-<body>
+Button:
+"أنشئ أثرك"
 
-  <div
-    id="intro"
-    class="intro"
-  >
-    <div class="introText">
+This section must be completely separate from the deceased memorials.
 
-      <div>
-        هم السابقون... ونحن اللاحقون.
-      </div>
+Add a simple form for creating a personal living أثر.
 
-      <small>
-        اللهم ارحم من دخلنا لنتذكره،
-        واغفر له وارفع درجته.
-      </small>
+Fields:
 
-      <button
-        id="skipIntro"
-        type="button"
-      >
-        تخطّي
-      </button>
+Name — required
 
-    </div>
-  </div>
+Photo — optional
 
-  <header>
+Show:
+"الصورة اختيارية، يكفي الاسم."
 
-    <a
-      class="brand"
-      href="/"
-    >
-      <b>أثر</b>
-      <span>رحمهم الله</span>
-    </a>
+Personal message — optional
 
-    <nav>
-      <a href="/">
-        الرئيسية
-      </a>
+Quran verses — optional
 
-      <a href="/#search">
-        البحث عن متوفى
-      </a>
+Dhikr — optional
 
-      <a href="/#create">
-        إنشاء تذكرة
-      </a>
+Dua — optional
 
-      <a href="/admin">
-        الإدارة
-      </a>
-    </nav>
+Add an option:
+"أضف لي محتوى تلقائيًا"
 
-    <button
-      id="menu"
-      class="hamb"
-      type="button"
-      aria-label="فتح القائمة"
-    >
-      ☰
-    </button>
+If the visitor chooses automatic content, automatically add respectful remembrance content, dhikr and duas.
 
-  </header>
+The visitor can also choose to write their own content instead.
 
-  <main id="app"></main>
+IMPORTANT:
 
-  <footer>
-    أثر — رحمهم الله
-    <br>
+Living أثر pages must NEVER appear inside the "المتوفون" section.
 
-    <span>
-      بعض الأسماء لا ينبغي أن تُنسى.
-    </span>
-  </footer>
+Living أثر pages must NEVER appear in "ذكرى اليوم".
 
-  <script
-    src="/app.js"
-    defer
-  ></script>
+Living أثر pages must NEVER appear in random deceased selection.
 
-</body>
-</html>
+The deceased and living أثر systems must remain completely separate.
+
+Keep all existing homepage sections and features:
+
+- search
+- random deceased
+- daily memorial
+- recent memorials
+- sharing
+- all existing navigation
+- existing memorial system
+
+Do not redesign the website.
+
+Keep the current Athar/Zikra identity, Arabic RTL layout, cinematic style, dark green/olive/ivory colors, soft shadows, rounded corners and mobile-first design.
